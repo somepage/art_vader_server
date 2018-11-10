@@ -1,0 +1,9 @@
+.idea/
+
+# File-based project format
+*.iws
+
+# IntelliJ
+out/
+
+__pycache__/

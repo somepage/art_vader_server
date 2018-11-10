@@ -1,42 +1,23 @@
-import glob
 import random
-from PIL import Image
+import json
 
-folders = glob.glob('hermitage/*')
 
-folders = list(map(lambda x: x.strip('hermitage/'), folders))
-
-n = len(folders)
-
-default_prob = 1 / len(folders)
-
-probability = [default_prob for i in range(n)]
-
-prediction_rate = 0.05
-
-command = ''
-
-while 1:
-    chosed = random.choices(folders, weights=probability)[0]
-    print(chosed)
-    path = 'hermitage/' + chosed
-    images = glob.glob(path + '/*.jpg')
-    image = images[random.randint(0, len(images) - 1)]
-    img = Image.open(image)
-    img.show()
-    command = input()
-    if command == 'like':
-        for w in probability:
-            w += -prediction_rate/(n-1)
-        w[w.index(chosed)] += prediction_rate + prediction_rate/(n-1)
-    elif command == 'dislike':
-        for w in probability:
-            w += prediction_rate/(n-1)
-        w[w.index(chosed)] += -prediction_rate - prediction_rate/(n-1)
+def change_weights(label, like, prediction_rate = 0.05):
+    with open('weights.json', 'r') as f:
+        weights = json.load(f)
+    if label not in weights.keys():
+        return "Label is not defined"
     else:
-        break
+        n = len(weights)
+        if like:
+            for value in weights.values():
+                value += -prediction_rate / (n - 1)
+            weights[label] += prediction_rate + prediction_rate / (n - 1)
+        else:
+            for value in weights.values():
+                value += prediction_rate / (n - 1)
+            weights[label] += -prediction_rate - prediction_rate / (n - 1)
+        with open('weights.json', 'w', encoding='utf-8') as f:
+            json.dump(weights, f, indent=4, ensure_ascii=False)
 
-
-
-
-
+        return random.choices(list(weights.keys()), weights=list(weights.values()))[0]
