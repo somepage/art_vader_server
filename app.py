@@ -5,7 +5,7 @@ from recommend import change_weights
 app = Flask(__name__)
 
 
-@app.route("/set_default", methods=['POST'])
+@app.route("/set_default", methods=['GET', 'POST'])
 def set_defaults():
     with open('weights.json', 'r') as f:
         json_data = json.load(f)
@@ -17,16 +17,31 @@ def set_defaults():
 
 @app.route("/opinion", methods=['GET', 'POST'])
 def like():
-    like = bool(request.args.get("like"))
-    label = request.args.get("label")
+    like = bool(request.values.get("like"))
+    label = request.values.get("label").lower()
+    print(label)
+
     return change_weights(label, like)
 
 
 @app.route("/museums", methods=['GET'])
 def get_museums():
-    museums = open("museums.json", "r")
-    resp = Response(response=museums, status=200, mimetype="application/json")
-    return resp
+    with open('weights.json', 'r') as f:
+        json_data = json.load(f)
+
+    if len(set(json_data.values())) != 1:
+        fav_label = [key for (key, value) in json_data.items() if value == max(list(json_data.values()))][0]
+        museums = open("museums.json", "r")
+        json_museum = json.load(museums)
+        fav_museum = {"genre": fav_label,
+                      "museums": json_museum[fav_label]}
+        fav_museum_arr = [fav_museum]
+        resp = Response(response=json.dumps(fav_museum_arr, ensure_ascii=False).encode('utf-8'), status=200,
+                        mimetype="application/json")
+        return resp
+    else:
+        resp = Response(response=[], status=200, mimetype="application/json")
+        return resp
 
 
 app.run(host='0.0.0.0', debug=True)

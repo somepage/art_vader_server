@@ -20,4 +20,4 @@ def change_weights(label, like, prediction_rate = 0.05):
         with open('weights.json', 'w', encoding='utf-8') as f:
             json.dump(weights, f, indent=4, ensure_ascii=False)
 
-        return random.choices(list(weights.keys()), weights=list(weights.values()))[0]
+        return (random.choices(list(weights.keys()), weights=list(weights.values()))[0]).encode('utf-8')
