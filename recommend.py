@@ -2,7 +2,7 @@ import random
 import json
 
 
-def change_weights(label, like, prediction_rate = 0.05):
+def change_weights(label, like, prediction_rate=0.05):
     with open('weights.json', 'r') as f:
         weights = json.load(f)
     if label not in weights.keys():
@@ -10,12 +10,12 @@ def change_weights(label, like, prediction_rate = 0.05):
     else:
         n = len(weights)
         if like:
-            for value in weights.values():
-                value += -prediction_rate / (n - 1)
+            for key in weights.keys():
+                weights[key] += -prediction_rate / (n - 1)
             weights[label] += prediction_rate + prediction_rate / (n - 1)
         else:
-            for value in weights.values():
-                value += prediction_rate / (n - 1)
+            for key in weights.keys():
+                weights[key] += -prediction_rate / (n - 1)
             weights[label] += -prediction_rate - prediction_rate / (n - 1)
         with open('weights.json', 'w', encoding='utf-8') as f:
             json.dump(weights, f, indent=4, ensure_ascii=False)
